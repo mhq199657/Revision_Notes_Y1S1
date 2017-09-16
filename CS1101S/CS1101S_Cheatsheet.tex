@@ -1,0 +1,501 @@
+\PassOptionsToPackage{svgnames}{xcolor}
+\documentclass[11pt]{article}
+
+%Define the listing package
+\usepackage[margin=0.6in]{geometry}
+\usepackage{listings} %code highlighter
+\usepackage{color} %use color
+\usepackage{pdfpages}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+ 
+%Customize a bit the look
+\lstset{ %
+backgroundcolor=\color{white}, % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+basicstyle=\footnotesize, % the size of the fonts that are used for the code
+breakatwhitespace=false, % sets if automatic breaks should only happen at whitespace
+breaklines=true, % sets automatic line breaking
+captionpos=b, % sets the caption-position to bottom
+commentstyle=\color{mygreen}, % comment style
+deletekeywords={...}, % if you want to delete keywords from the given language
+escapeinside={\%*}{*)}, % if you want to add LaTeX within your code
+extendedchars=true, % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+frame=single, % adds a frame around the code
+keepspaces=true, % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+keywordstyle=\color{blue}, % keyword style
+% language=Octave, % the language of the code
+morekeywords={*,...}, % if you want to add more keywords to the set
+numbers=left, % where to put the line-numbers; possible values are (none, left, right)
+numbersep=5pt, % how far the line-numbers are from the code
+numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+rulecolor=\color{black}, % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+showspaces=false, % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+showstringspaces=false, % underline spaces within strings only
+showtabs=false, % show tabs within strings adding particular underscores
+stepnumber=1, % the step between two line-numbers. If it's 1, each line will be numbered
+stringstyle=\color{mymauve}, % string literal style
+tabsize=2, % sets default tabsize to 2 spaces
+title=\lstname % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+%END of listing package%
+ 
+\definecolor{darkgray}{rgb}{.4,.4,.4}
+\definecolor{purple}{rgb}{0.65, 0.12, 0.82}
+ 
+%define Javascript language
+\lstdefinelanguage{JavaScript}{
+keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+keywordstyle=\color{blue}\bfseries,
+ndkeywords={class, export, boolean, throw, implements, import, this},
+ndkeywordstyle=\color{darkgray}\bfseries,
+identifierstyle=\color{black},
+sensitive=false,
+comment=[l]{//},
+morecomment=[s]{/*}{*/},
+commentstyle=\color{purple}\ttfamily,
+stringstyle=\color{red}\ttfamily,
+morestring=[b]',
+morestring=[b]"
+}
+ 
+\lstset{
+language=JavaScript,
+extendedchars=true,
+basicstyle=\footnotesize\ttfamily,
+showstringspaces=false,
+showspaces=false,
+numbers=left,
+numberstyle=\footnotesize,
+numbersep=9pt,
+tabsize=2,
+breaklines=true,
+showtabs=false,
+captionpos=b
+}
+\begin{document}
+\begin{lstlisting}[language=JavaScript]
+//List operations
+function remove_duplicates(lst){
+    if(is_empty_list(lst)){
+        return [];
+    }else{
+        var h = head(lst);
+        return pair(h,
+        			accumulate(function(a,b){
+        							return a!==h?pair(a,b):b;
+        					   },[],remove_duplicates(tail(lst))));
+    }
+}
+function are_equal_sets(set1,set2){
+    var r = map(function(e){return !is_empty_list(member(e,set1));},set2);
+    var b = accumulate(function(a,b){return a&&b;},true,r);
+    if(length(set1)===0&&length(set2)===0){
+        return true;
+    }else if(length(set1)===length(set2)&&b){
+        return true;
+    }else{
+        return false;
+    }
+}
+function mergeB(xs, ys) {
+	if (is_empty_list(xs) && is_empty_list(ys)) {
+		return [];
+	} else if (is_empty_list(xs)) {
+		set_tail(ys, mergeB(xs, tail(ys)));
+		return ys;
+	} else if (is_empty_list(ys)) {
+		set_tail(xs, mergeB(tail(xs), ys));
+		return xs;
+	} else if (head(xs) <= head(ys)) {
+		set_tail(xs, mergeB(tail(xs), ys));
+		return xs;
+	} else {
+		set_tail(ys, mergeB(xs, tail(ys)));
+		return ys;
+	}
+}
+//Trees
+function accumulate_tree(op,init,tree){
+  	if(is_empty_list(tree)){
+    	return init;
+  	}else if(!is_list(head(tree))){
+    	return op(head(tree),accumulate_tree(op,init,tail(tree)));
+  	}else{
+    	return op(accumulate_tree(op,init,head(tree)),
+    		      accumulate_tree(op,init,tail(tree)));
+  	}
+}
+
+function count_leaves(tree) {
+	return (is_empty_list(tree))
+				? 0
+				: (is_list(head(tree))
+						? count_leaves(head(tree))
+						: 1)
+				  + count_leaves(tail(tree));
+}
+
+function longest_path(tree){
+    if(!is_list(tree)){
+        return 1;
+    }else
+    if(is_empty_list(tree)){
+        return 1;
+    }else if(!is_list(head(tree)))
+    {
+        return 1+longest_path(tail(tree));
+    }else{
+        return 1+Math.max(longest_path(head(tree)),longest_path(tail(tree)));
+    }
+}
+//Somewhat related
+function cc(amount, kinds) {
+	if (amount === 0) {
+		return 1;
+	} else if (amount < 0 || kinds === 0) {
+		return 0;
+	} else {
+		return cc(amount, kinds - 1) + cc(amount - highest_denom(kinds), kinds);
+	}
+}
+//Permutations
+function permutations(s) {
+	if (is_empty_list(s)) {
+		return list([]);
+	} else {
+		return accumulate(
+					append, [],
+						map(function(x) {
+								return map(function(p) {
+												return pair(x,p);
+											},
+										   permutations(remove(x,s)));
+							},
+						s)
+						);
+	}
+}
+function permutations_r(s,r) {
+    if (r===0||is_empty_list(s)) {
+        return list([]);
+    } else {
+        return accumulate(append, [],
+                                    map(function(x) {
+                                            return map(function(p) {
+                                                            return pair(x, p);
+                                                    },
+                                        permutations_r(remove(x, s),r-1));
+                                    }, s));
+    }
+}
+function combinations(xs,k){
+	if(k===0){
+		return list([]);
+	}else if(is_empty_list(xs)){
+		return [];
+	}else{
+		var s1 = combinations(tail(xs),k-1);
+		var s2 = combinations(tail(xs),k);
+		var x = head(xs);
+		var has_x = map(function(s){return pair(x,s);},s1);
+		return append(has_x,s2);
+	}
+}
+//Power set
+function power_set(s){
+	if(is_empty_list(s)){
+		return list([]);
+	}else{
+		var rest = power_set(tail(s));
+		return append(rest,map(function(x){return pair(head(s),x);},rest));
+	}
+}
+//Subsequence
+function all_subsequences(xs){
+	if (is_empty_list(xs)){
+		return list([]);
+	}else{
+		var ys = all_subsequences(tail(xs));
+		return append(ys,
+					 map(
+						 function(y){
+							return pair(head(xs),y);
+						 },
+						 ys));
+	}
+}
+//Tower of Hanoi
+function move_tower(size, from, to, extra) {
+	if (size === 0) {
+		;
+	} else {
+		move_tower(size - 1, from, extra, to);
+		display("move from " + from + " to " + to);
+		move_tower(size-1, extra, to, from);
+	}
+}
+//OOP
+function Class(arg1,arg2){
+	this.field1 = arg1;
+	this.field2 = arg2;
+	//or
+	//SuperClass.call(this,arg1,arg2);
+}
+Class.Inherits(Class);
+Class.prototype.method1 = function(a,b){
+	//Superclass.prototype.methodname.call(a,b);
+}
+//Tream
+var e = function(){return [];};
+var a = pair(2,function(){return pair(4,e);});
+var b = pair(3,function(){return pair(5,e);});
+var t = pair(a,function(){return pair(b,e);});
+
+function tream_map(f, t){
+	if (is_empty_list(t)){
+		return [];
+	} else {
+		var x = function() {
+			return tream_map(f, stream_tail(t));
+		};
+		if(is_pair(head(t))){
+			return pair(tream_map(f, head(tree)), x);
+		}else{
+			return pair(f(head(tree)), x);
+		}
+	}
+}
+//Loop
+var count_pair= (function(seen){
+	function fn(x){
+	
+		if(! is_pair(x)){
+			return 0;
+		}else if(!is_empty_list(member(x,seen))){
+			return 0;
+		}else{
+		    //display(x); //For debugging
+			seen = append(list(x),seen);
+			//display("What is in seen is "+seen);
+			return count_pair(head(x))+count_pair(tail(x))+1;
+		}
+	}
+	return fn;
+})([]);
+var has_loop = (function(seen){
+	function fn(x){
+		if(is_empty_list(x)){
+			return false;
+		}else if(!is_empty_list(member(x,seen))){
+			return true;
+		}else{
+			seen = append(list(x),seen);
+			return has_loop(tail(x));
+		}
+	}
+	return fn;
+})([]);
+function has_loop(lst){
+    function next(xs){
+        if(equal(xs,false)||is_empty_list(xs)||is_empty_list(tail(xs))){
+            return false;
+        }else{
+            return tail(xs);
+        }
+    }
+    function fn(p1,p2){
+        display(p1);
+        display(p2);
+    	if(equal(p1,false)||equal(p2,false)){
+    		return false;
+    	}else{
+    		if(p1===p2){
+    			return true;
+    		}else{
+    			return fn(next(p1),next(next(p2)));
+    		}
+    	}
+    }
+    return fn(next(lst),next(next(lst)));
+}
+function memoize(f) {
+	var table = make_table();
+	return function(x) {
+		if (has_key(x, table)) {
+			return lookup(x, table);
+		} else {
+			var result = f(x);
+			insert(x, result, table);
+			return result;
+		}
+	}
+}
+function memo_fun(fun) {
+	var already_run = false;
+	var result = undefined;
+	return function() {
+				if (!already_run) {
+					result = fun();
+					already_run = true;
+					return result;
+				} else {
+					return result;
+				}
+			};
+}
+//Mutable List
+function mutable_reverse(xs) {
+// VERSION 1
+	if (is_empty_list(xs)) {
+		return xs;
+	} else if (is_empty_list(tail(xs))) {
+		return xs;
+	} else {
+		var temp = mutable_reverse(tail(xs));
+		set_tail(tail(xs), xs);
+		set_tail(xs, []);
+	return temp;
+// VERSION 2
+	function helper(prev, xs) {
+		if (is_empty_list(xs)) {
+			return prev;
+		} else {
+			var rest = tail(xs);
+			set_tail(xs, prev);
+			return helper(xs, rest);
+		}
+	}
+	return helper([], xs);
+}
+//Stream
+function inverse_unit_series(s){
+	return pair(1,function(){return scale_series(-1,mul_series(stream_tail(s),inverse_unit_series(s)));});
+}
+function div_series(s1,s2){//s1 / s2 check divisibility before dividing
+	var constant_term = head(s2);
+	if(constant_term===0){
+		return "Error: divided by 0";
+	}else{
+		return scale_stream(1/constant_term,function(){return mul_series(s1,inverse_unit_series(scale_series(1/constant_term,s2)));});
+	}
+}
+
+function stream_append_pickle(xs, ys) {
+	if (is_empty_list(xs)) {
+		return ys();
+	} else {
+		return pair(head(xs),
+					function() {
+						return stream_append_pickle(stream_tail(xs),
+													ys);
+					});
+	}
+}
+
+function sieve(s) {
+	return pair(head(s),
+		function() {
+			return sieve(stream_filter(function(x) {return !is_divisible(x, head(s));},stream_tail(s)));
+		});
+}
+var primes = sieve(integers_from(2));
+//Intepreter
+//Question 2
+function is_variable_assignment(stmt){
+    return stmt.tag==="assignment";
+}
+//Question 2
+function is_variable_assignment(stmt){
+    return stmt.tag==="assignment";
+}
+function set_variable_value(variable,val, env) {
+    function env_loop(env) {
+        if (is_empty_environment(env)) {
+            error("Unbound variable: " + variable);
+        } else if (has_binding_in_frame(variable.name, first_frame(env))) {
+            first_frame(env)[variable.name] = force(evaluate(val,env));
+            return undefined;
+            /*
+            var val = force(first_frame(env)[variable]);
+            first_frame(env)[variable] = val;
+            return val;
+            */
+        } else {
+            return env_loop(enclosing_environment(env));
+        }
+    }
+    return env_loop(env);
+}
+//Question 3
+function is_boolean_operation(stmt){
+    return stmt.tag==="boolean_op";
+}
+function evaluate_boolean_operation(val1, val2, operator, env){
+    var v1 = force(evaluate(val1,env));
+    var v2 = force(evaluate(val2,env));
+    if( operator==="||"){
+        return v1||v2;
+    }else{
+        return v1&&v2;
+    }
+}
+//Question 4
+function is_while_statement(stmt){
+    return stmt.tag==="while";
+}
+function evaluate_while_statement(predicate,list_of_statements,env){
+    function loop(remaining_statements){
+        if(is_empty_list(remaining_statements)){
+            return evaluate_while_statement(predicate,list_of_statements,env);
+        }else{
+            force(evaluate(head(remaining_statements),env));
+            loop(tail(remaining_statements));
+        }
+    }
+    if(force(evaluate(predicate,env))===true){
+        loop(list_of_statements);
+    }else{
+        return undefined;
+    }
+}
+//For loop
+function is_for_loop(stmt){
+    return stmt.tag==="for";
+}
+function evaluate_for_loop(initialiser,predicate,finaliser,statements,env){
+    function loop(remaining_statements){
+        if(is_empty_list(remaining_statements)){
+            force(evaluate(finaliser,env));
+            if(force(evaluate(predicate,env))===true){
+                return evaluate_for_loop(undefined,predicate,finaliser,statements,env);
+            }else{
+                return undefined;
+            }
+        }else{
+            var h = head(remaining_statements);
+                force(evaluate(head(remaining_statements),env));
+                loop(tail(remaining_statements));
+        }
+    }
+    if(initialiser===undefined){
+        ;
+    }else{
+        force(evaluate(initialiser,env));
+    }
+    loop(statements);
+    return undefined;
+}
+
+//Reference 
+build_list(n, f) //Makes a list with n elements 
+				   by applying the unary function f to the numbers 0 to n - 1.
+for_each(f, xs)  //Applies f to every element of the list xs, and then returns true.
+remove(x, xs)  remove_all(x, xs)
+enum_list(start, end)
+				 // Returns a list that enumerates numbers starting from start 
+				 //	using a step size of 1, until the number exceeds (>) end.
+\end{lstlisting}
+\clearpage
+
+\end{document}
